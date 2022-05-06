@@ -25,7 +25,7 @@ func main() {
 	// dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUsername, dbPassword, dbHost, dbPort, dbDatabase)
 	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
-	//POSTGRESQL SETUP PRODUCTION
+	//POSTGRESQL SETUP
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Shanghai", dbHost, dbUsername, dbPassword, dbDatabase, dbPort)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
