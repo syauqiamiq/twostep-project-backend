@@ -5,7 +5,7 @@ import "time"
 type User struct {
 	ID             int
 	Name           string
-	Email          string
+	Email          string `gorm:"uniqueIndex"`
 	Password       string
 	Role           string
 	AvatarFileName string

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"twostep-backend/auth"
 	"twostep-backend/handler"
 	"twostep-backend/user"
 
@@ -17,12 +18,17 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	db.AutoMigrate(&user.User{})
+
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
-	userHandler := handler.NewUserHandler(userService)
+	authService := auth.NewService()
+	userHandler := handler.NewUserHandler(userService, authService)
 
 	router := gin.Default()
 
 	v1 := router.Group("api/v1")
-	v1.POST("/users", userHandler.RegisterUser)
+	v1.POST("/users/login", userHandler.RegisterUser)
+
+	router.Run("localhost:5000")
 }
