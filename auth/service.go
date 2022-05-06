@@ -1,6 +1,12 @@
 package auth
 
-import "github.com/golang-jwt/jwt"
+import (
+	"log"
+	"os"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/joho/godotenv"
+)
 
 type Service interface {
 	GenerateToken(userID int) (string, error)
@@ -13,16 +19,18 @@ func NewService() *jwtService {
 	return &jwtService{}
 }
 
-var SECRET_KEY = []byte("KEY_SEMENTARA")
-
 func (s *jwtService) GenerateToken(userID int) (string, error) {
 	claim := jwt.MapClaims{
 		"user_id": userID,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-
-	signedToken, err := token.SignedString(SECRET_KEY)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	var secretKey = []byte(os.Getenv("SECRET_KEY"))
+	signedToken, err := token.SignedString(secretKey)
 	if err != nil {
 		return signedToken, err
 	}
