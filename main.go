@@ -32,9 +32,10 @@ func main() {
 	router := gin.Default()
 
 	v1 := router.Group("api/v1")
-	v1.POST("/users/register", userHandler.RegisterUser)
-	v1.POST("/users/login", userHandler.LoginHandler)
-	v1.GET("/users/authme", authMiddleware(userService, authService), userHandler.AuthMe)
+	v1.POST("/users/auth/register", userHandler.RegisterUser)
+	v1.POST("/users/auth/login", userHandler.LoginHandler)
+	v1.GET("/users/auth/me", authMiddleware(userService, authService), userHandler.AuthMe)
+	v1.POST("/users/avatars", authMiddleware(userService, authService), userHandler.UploadAvatar)
 
 	router.Run("localhost:5000")
 }
