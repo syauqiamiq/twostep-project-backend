@@ -107,3 +107,26 @@ func (h *userHandler) LoginHandler(c *gin.Context) {
 	response := helper.APIResponse("Login Success", http.StatusOK, "success", data)
 	c.JSON(http.StatusOK, response)
 }
+
+func (s *userHandler) AuthMe(c *gin.Context) {
+	currentUser := c.MustGet("currentUser").(user.User)
+	userId := currentUser.ID
+	user, err := s.service.GetUserByID(userId)
+	if err != nil {
+		errorMessage := gin.H{
+			"error": err.Error(),
+		}
+		response := helper.APIResponse("Register Failed", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{
+		"id":    user.ID,
+		"name":  user.Name,
+		"email": user.Email,
+		"role":  user.Role,
+	}
+	response := helper.APIResponse("Authenticated", http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, response)
+}

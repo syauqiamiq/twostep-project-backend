@@ -2,11 +2,15 @@ package main
 
 import (
 	"log"
+	"net/http"
+	"strings"
 	"twostep-backend/auth"
 	"twostep-backend/handler"
+	"twostep-backend/helper"
 	"twostep-backend/user"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -30,6 +34,51 @@ func main() {
 	v1 := router.Group("api/v1")
 	v1.POST("/users/register", userHandler.RegisterUser)
 	v1.POST("/users/login", userHandler.LoginHandler)
+	v1.GET("/users/authme", authMiddleware(userService, authService), userHandler.AuthMe)
 
 	router.Run("localhost:5000")
+}
+
+func authMiddleware(userService user.Service, authService auth.Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+
+		if !strings.Contains(authHeader, "Bearer") {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		arrayToken := strings.Split(authHeader, " ")
+		tokenString := ""
+		//Berhasil Split
+
+		if len(arrayToken) == 2 {
+			tokenString = arrayToken[1]
+		}
+		validatedToken, err := authService.ValidateToken(tokenString)
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		claim, ok := validatedToken.Claims.(jwt.MapClaims)
+		if !ok || !validatedToken.Valid {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+		userID := int(claim["user_id"].(float64))
+
+		//Check User ada di database
+		user, err := userService.GetUserByID(userID)
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		c.Set("currentUser", user)
+	}
 }

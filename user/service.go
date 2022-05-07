@@ -9,6 +9,7 @@ import (
 type Service interface {
 	RegisterUser(input RegisterUserInput) (User, error)
 	LoginUser(input LoginInput) (User, error)
+	GetUserByID(ID int) (User, error)
 }
 
 type service struct {
@@ -57,5 +58,13 @@ func (s *service) LoginUser(input LoginInput) (User, error) {
 		return user, err
 	}
 
+	return user, nil
+}
+
+func (s *service) GetUserByID(ID int) (User, error) {
+	user, err := s.repository.FindByID(ID)
+	if err != nil {
+		return user, err
+	}
 	return user, nil
 }
