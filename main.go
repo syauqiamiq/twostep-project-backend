@@ -9,6 +9,7 @@ import (
 	"twostep-backend/helper"
 	"twostep-backend/user"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"gorm.io/driver/mysql"
@@ -30,6 +31,8 @@ func main() {
 	userHandler := handler.NewUserHandler(userService, authService)
 
 	router := gin.Default()
+
+	router.Use(cors.Default())
 
 	v1 := router.Group("api/v1")
 	v1.POST("/users/auth/register", userHandler.RegisterUser)
