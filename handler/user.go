@@ -39,8 +39,9 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	userID := newUser.ID
+
 	//Generate Token
+	userID := newUser.ID
 	token, err := h.authService.GenerateToken(userID)
 	if err != nil {
 		errorMessage := gin.H{
@@ -60,4 +61,49 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	response := helper.APIResponse("Register Success", http.StatusOK, "success", data)
 	c.JSON(http.StatusOK, response)
 
+}
+
+func (h *userHandler) LoginHandler(c *gin.Context) {
+	var input user.LoginInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errorMessage := gin.H{
+			"error": "INPUT FORMAT WRONG",
+		}
+		response := helper.APIResponse("Input Format Wrong", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	loggedInUser, err := h.service.LoginUser(input)
+	if err != nil {
+		errorMessage := gin.H{
+			"error": err.Error(),
+		}
+		response := helper.APIResponse("Input Format Wrong", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	//Generate Token
+	userID := loggedInUser.ID
+	token, err := h.authService.GenerateToken(userID)
+	if err != nil {
+		errorMessage := gin.H{
+			"error": err.Error(),
+		}
+		response := helper.APIResponse("Register Failed", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{
+		"id":    loggedInUser.ID,
+		"name":  loggedInUser.Name,
+		"email": loggedInUser.Email,
+		"role":  loggedInUser.Role,
+		"token": token,
+	}
+
+	response := helper.APIResponse("Login Success", http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, response)
 }
