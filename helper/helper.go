@@ -1,5 +1,11 @@
 package helper
 
+import (
+	"log"
+
+	"github.com/joho/godotenv"
+)
+
 type Response struct {
 	Meta Meta        `json:"meta"`
 	Data interface{} `json:"data"`
@@ -23,4 +29,11 @@ func APIResponse(message string, code int, status string, data interface{}) Resp
 		Data: data,
 	}
 	return res
+}
+
+func EnvLoad() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
